@@ -1,55 +1,28 @@
+# hellp.py
+
 from selenium import webdriver
-import time
-import json
-import os
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+# 1. 导入 webdriver_manager
+from webdriver_manager.chrome import ChromeDriverManager
 
-# 虚拟出Chrome界面
-chrome_options = Options()
+# 假设你在这里设置了 chrome_options
 chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--window-size=1420,1080')
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--disable-gpu')
-# action  linux服务器驱动地址
+# 这里可以添加你需要的各种选项，例如无头模式
+# chrome_options.add_argument('--headless')
+# chrome_options.add_argument('--no-sandbox')
+# chrome_options.add_argument('--disable-dev-shm-usage')
 
-service = Service(executable_path='/home/runner/work/Neworld_SignIn/Neworld_SignIn/driver/chromedriver')
+
+# 2. 使用 ChromeDriverManager().install() 来自动处理驱动
+# 它会返回正确版本的驱动路径
+service = Service(ChromeDriverManager().install())
+
+# 3. 像之前一样，使用 service 和 options 来初始化浏览器
+# 这一行不需要改变
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# driver = webdriver.Chrome(executable_path='/home/runner/work/Neworld_SignIn/Neworld_SignIn/driver/chromedriver')    # Chrome浏览器  
-
-# windows 系统驱动路径
-# driver = webdriver.Chrome(executable_path='D:\Downloads\chromedriver_win32\chromedriver.exe')    # Chrome浏览器
-
-
-# 环境变量中读取数据，包含账号密码，和登陆页面测试
-u = os.environ["USERNAME"]
-p = os.environ["PASSWORD"]
-
-print('u',u)
-print('p',p)
-driver.get("https://neworld.tv/auth/login") 
-#  获取cookies 
-time.sleep(5)
-# 账号密码登录版本
-driver.find_element_by_id('email').clear()
-driver.find_element_by_id("email").send_keys(u)
-
-driver.find_element_by_id('passwd').clear()
-driver.find_element_by_id("passwd").send_keys(p)
-
-time.sleep(1)
-driver.find_element_by_id("login").click()
-
-driver.refresh()#刷新页面 
-
-
-driver.refresh()#刷新页面 
-
-# time.sleep(5)
-
-# buttons = driver.find_element_by_xpath("//button[@id='checkin']")
-# print('buttons',buttons)
-
-driver.find_element_by_id("checkin").click() # 点击元素
+# --- 你的其他代码 ---
+# ...
+# driver.get("...")
+# ...
+# driver.quit()
