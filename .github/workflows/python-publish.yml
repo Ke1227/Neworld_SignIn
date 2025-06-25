@@ -1,55 +1,45 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# GitHub Actions Workflow for Neworld Project
+# This workflow runs a Python script on a schedule or manually.
+# It automatically handles Chrome and ChromeDriver versions.
 
 name: Neworld
 
 on:
-  # push: # push触发
-  
-  workflow_dispatch: # 手动触发
+  workflow_dispatch: # 允许手动触发
   schedule: # 计划任务触发
-    - cron: '0 1 * * *' 
-    # cron表达式，时区是UTC时间，比我们早8小时，要用我们的时间减去8小时后填上去，如上所表示的是每天09点
-    # 建议每个人都修改下时间！不要使用默认时间！最好不要设定在整点，错开峰值，避免大量G站同一个IP在相同时间去请求B站接口，导致IP被禁！
+    # CRON 表达式, 时区为 UTC.
+    # '0 1 * * *' 对应的是北京时间 (UTC+8) 的上午9点.
+    # 建议修改分钟数，例如 '15 1 * * *'，以避开高峰期。
+    - cron: '15 1 * * *'
 
 jobs:
-  run-Neworld-tool:
-
+  run-neworld-tool:
+    # 使用最新的 Ubuntu 运行环境
     runs-on: ubuntu-latest
 
     steps:
-    # 输出IP
-    - name: IP
-      run: sudo curl ifconfig.me
-      
-    # 设置服务器时区为东八区 
-    - name: Set time zone
-      run: sudo timedatectl set-timezone 'Asia/Shanghai'
-      
-    # 检出
-    - name: Checkout
-      uses: actions/checkout@v2
-    
-    # Python 环境
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        sudo pip install pyvirtualdisplay;
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-        pip install selenium
-        whereis  chromedriver
-        cd /home/runner/work/Neworld_SignIn/Neworld_SignIn/driver
-        sudo chmod +x chromedriver
-    - name: Build and publish
-      env:
-         USERNAME: ${{ secrets.USERNAME }}
-         PASSWORD: ${{ secrets.PASSWORD }}
-      run: |
-        python hellp.py
+      # 步骤 1: 检出你的代码仓库
+      - name: Checkout repository
+        uses: actions/checkout@v3 # 使用更新的 v3 版本
+
+      # 步骤 2: 设置 Python 环境
+      - name: Set up Python
+        uses: actions/setup-python@v4 # 使用更新的 v4 版本
+        with:
+          python-version: '3.10' # 建议指定一个明确的版本，例如 3.10
+
+      # 步骤 3: 安装依赖 (核心改动)
+      # 这一步会自动安装 Chrome 浏览器、pip 包以及最重要的 webdriver-manager
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # 将所有依赖一次性安装，包括 selenium 和 webdriver-manager
+          pip install selenium webdriver-manager pyvirtualdisplay setuptools wheel twine
+
+      # 步骤 4: 运行你的 Python 脚本
+      # 无需再关心驱动路径和权限，webdriver-manager 会自动处理
+      - name: Run Python script
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: python hellp.py
